@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Counter</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+            --background-color: #f8fafc;
+            --skeleton-color: #e2e8f0;
+            --card-color: rgba(255, 255, 255, 0.98);
+            --text-color: #1e293b;
+            --border-radius: 24px;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans Arabic', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            direction: rtl;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        .container {
+            background: var(--card-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 20px; /* کەمکردنەوەی پادینگ بۆ ڕیسپۆنسیڤ */
+            width: 100%;
+            max-width: 700px;
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px; /* کەمکردنەوەی مارجین بۆ ڕیسپۆنسیڤ */
+        }
+
+        .header h1 {
+            font-size: 2rem; /* بچووککردنەوەی قەبارەی فۆنت بۆ ڕیسپۆنسیڤ */
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px; /* کەمکردنەوەی مارجین بۆ ڕیسپۆنسیڤ */
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column; /* گۆڕینی ئاراستە بۆ ستوونی بۆ ڕیسپۆنسیڤ */
+            gap: 10px; /* کەمکردنەوەی گەپ بۆ ڕیسپۆنسیڤ */
+            margin-bottom: 20px; /* کەمکردنەوەی مارجین بۆ ڕیسپۆنسیڤ */
+        }
+
+        .date-input {
+            padding: 12px; /* کەمکردنەوەی پادینگ بۆ ڕیسپۆنسیڤ */
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: var(--border-radius);
+            font-size: 1rem; /* بچووککردنەوەی قەبارەی فۆنت بۆ ڕیسپۆنسیڤ */
+            background: white;
+            transition: var(--transition);
+            width: 100%; /* فراوانکردنی بۆ تەواوی پانایی بەردەست */
+        }
+
+        .calculate-btn {
+            padding: 12px 25px; /* کەمکردنەوەی پادینگ بۆ ڕیسپۆنسیڤ */
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem; /* بچووککردنەوەی قەبارەی فۆنت بۆ ڕیسپۆنسیڤ */
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%; /* فراوانکردنی بۆ تەواوی پانایی بەردەست */
+        }
+
+        .results-section {
+            margin-bottom: 20px; /* کەمکردنەوەی مارجین بۆ ڕیسپۆنسیڤ */
+        }
+
+        .loading-placeholder {
+            background: white;
+            padding: 15px; /* کەمکردنەوەی پادینگ بۆ ڕیسپۆنسیڤ */
+            border-radius: var(--border-radius);
+            margin-bottom: 15px; /* کەمکردنەوەی مارجین بۆ ڕیسپۆنسیڤ */
+        }
+
+        .loading-line {
+            height: 18px; /* کەمکردنەوەی بەرزی بۆ ڕیسپۆنسیڤ */
+            background: var(--skeleton-color);
+            border-radius: 12px;
+            margin: 8px 0; /* کەمکردنەوەی مارجین بۆ ڕیسپۆنسیڤ */
+            animation: pulse 1.5s infinite;
+        }
+
+        .results-text {
+            background: white;
+            padding: 20px; /* کەمکردنەوەی پادینگ بۆ ڕیسپۆنسیڤ */
+            border-radius: var(--border-radius);
+            font-size: 1.1rem; /* بچووککردنەوەی قەبارەی فۆنت بۆ ڕیسپۆنسیڤ */
+            line-height: 1.6; /* کەمکردنەوەی بەرزی هێڵ بۆ ڕیسپۆنسیڤ */
+            text-align: center;
+            opacity: 0;
+            display: none;
+        }
+
+        .results-text.active {
+            display: block;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .value {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.3rem; /* بچووککردنەوەی قەبارەی فۆنت بۆ ڕیسپۆنسیڤ */
+        }
+
+        .blessing {
+            background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            padding: 20px; /* کەمکردنەوەی پادینگ بۆ ڕیسپۆنسیڤ */
+            border-radius: var(--border-radius);
+            text-align: center;
+            opacity: 0;
+            display: none;
+        }
+
+        .blessing.active {
+            display: block;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .blessing-text {
+            color: var(--primary-color);
+            font-size: 1.2rem; /* بچووککردنەوەی قەبارەی فۆنت بۆ ڕیسپۆنسیڤ */
+            font-weight: 700;
+            margin-bottom: 10px; /* کەمکردنەوەی مارجین بۆ ڕیسپۆنسیڤ */
+        }
+
+        .reminder-text {
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 1rem; /* بچووککردنەوەی قەبارەی فۆنت بۆ ڕیسپۆنسیڤ */
+        }
+
+        .صلوات {
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ڕیسپۆنسیڤ بۆ قەبارەی بچووکتری شاشە */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .results-text {
+                font-size: 1rem;
+            }
+
+            .value {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ژمێرەری تەمەن</h1>
+        </div>
+
+        <div class="input-section">
+            <input type="date" id="birthdate" class="date-input" value="2000-01-01">
+            <button onclick="startCalculation()" class="calculate-btn">ژمێرە</button>
+        </div>
+
+        <div class="results-section">
+            <div id="loading" class="loading-placeholder">
+                <div class="loading-line"></div>
+                <div class="loading-line"></div>
+                <div class="loading-line"></div>
+            </div>
+            <div id="results" class="results-text">
+                تەمەنت بریتییە لە: <span id="years" class="value">0</span> ساڵ و 
+                <span id="months" class="value">0</span> مانگ و 
+                <span id="days" class="value">0</span> ڕۆژ و 
+                <span id="hours" class="value">0</span> سەعات و 
+                <span id="minutes" class="value">0</span> خولەک و 
+                <span id="seconds" class="value">0</span> چرکە
+            </div>
+        </div>
+
+        <div id="blessing" class="blessing">
+            <p class="blessing-text">یاخوا تەمەن درێژ و سەلامەت بیت ئەزیزم</p>
+            <p class="reminder-text">یادی خوات بیر نەچێ، مردن زۆر نزیکە</p>
+            <p class="صلوات">اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ</p>
+        </div>
+    </div>
+
+    <script>
+        let intervalId; // بۆ هەڵگرتنی IDی ئینتەرڤاڵەکە
+
+        function calculateAge() {
+            const birthdateInput = document.getElementById("birthdate");
+            const birthdateValue = birthdateInput.value;
+
+            if (!birthdateValue) {
+                alert("تکایە ڕۆژی لەدایکبوون هەڵبژێرە.");
+                return;
+            }
+
+            const birthdate = new Date(birthdateValue);
+            const now = new Date();
+
+            if (isNaN(birthdate.getTime())) {
+                alert("ڕۆژی لەدایکبوون دروست نییە.");
+                return;
+            }
+
+            if (birthdate > now) {
+                alert("ڕۆژی لەدایکبوون ناتوانێت لە داهاتوودا بێت!");
+                return;
+            }
+
+            let years = now.getFullYear() - birthdate.getFullYear();
+            let months = now.getMonth() - birthdate.getMonth();
+            let days = now.getDate() - birthdate.getDate();
+            let hours = now.getHours() - birthdate.getHours();
+            let minutes = now.getMinutes() - birthdate.getMinutes();
+            let seconds = now.getSeconds() - birthdate.getSeconds();
+
+            // ڕێکخستن بۆ بەها نەرێنییەکان
+            if (seconds < 0) {
+                seconds += 60;
+                minutes--;
+            }
+            if (minutes < 0) {
+                minutes += 60;
+                hours--;
+            }
+            if (hours < 0) {
+                hours += 24;
+                days--;
+            }
+            if (days < 0) {
+                const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+                days += lastDayOfMonth;
+                months--;
+            }
+            if (months < 0) {
+                months += 12;
+                years--;
+            }
+
+            return { years, months, days, hours, minutes, seconds };
+        }
+
+        function updateAge() {
+            const age = calculateAge();
+
+            // نوێکردنەوەی بەهاکان
+            document.getElementById("years").textContent = age.years;
+            document.getElementById("months").textContent = age.months;
+            document.getElementById("days").textContent = age.days;
+            document.getElementById("hours").textContent = age.hours;
+            document.getElementById("minutes").textContent = age.minutes;
+            document.getElementById("seconds").textContent = age.seconds;
+        }
+
+        function startCalculation() {
+            const loading = document.getElementById("loading");
+            const results = document.getElementById("results");
+            const blessing = document.getElementById("blessing");
+            
+            // دەرخستنی لۆدینگ
+            loading.style.display = "block";
+            results.style.display = "none";
+            blessing.style.display = "none";
+            blessing.classList.remove('active');
+            results.classList.remove('active');
+
+            setTimeout(() => {
+                loading.style.display = "none";
+                results.style.display = "block";
+                results.classList.add('active');
+                blessing.style.display = "block";
+                setTimeout(() => {
+                    blessing.classList.add('active');
+                }, 300);
+
+                updateAge(); // یەکسەر تەمەنەکە نوێ بکەرەوە
+                if (intervalId) {
+                    clearInterval(intervalId); // ئەگەر ئینتەرڤاڵ هەبوو، ڕایبگرە
+                }
+                intervalId = setInterval(updateAge, 1000); // هەموو چرکەیەک تەمەنەکە نوێ بکەرەوە
+            }, 1500); // ماوەی لۆدینگ
+        }
+    </script>
+</body>
+</html>
